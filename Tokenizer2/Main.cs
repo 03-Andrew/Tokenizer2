@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 
 
@@ -21,10 +22,6 @@ class Token
     }
     public string GetInfo()
     {
-        return $"Token: {Text, -20} {Type, -20}: at Row: {Row}, Index: {Index} ";
-    }
-    public string GetInfo2()
-    {
         return $"Token: {Text,-25} {Type,-20} at row {Row} index {Index}";
     }
 
@@ -39,15 +36,20 @@ class Tokenizer
         string currentDirectory = Directory.GetCurrentDirectory();
         string projectDirectory = Directory.GetParent(currentDirectory)?.Parent?.FullName;
         string filePath = Path.Combine(projectDirectory, fileName);
-
+        
         try
         {
             List<Token> tokens = tokenizeFile2(filePath);
             foreach (Token token in tokens)
             {
-                Console.WriteLine(token.GetInfo2());
+                if(token.Text != "EOF")
+                {
+                    Console.WriteLine(token.GetInfo());
+                    continue;
+                }
+                Console.WriteLine($"{token.Text,-32} {token.Type,-20}" +
+                        $" at row {token.Row} index {token.Index} ");
             }
-            Console.WriteLine("EOF\n[" + string.Join(", ", getTokens(tokens)) + "]");
         }
         catch (Exception e)
         {
@@ -58,7 +60,7 @@ class Tokenizer
     static List<Token> tokenizeFile2(string filePath)
     {
         List<Token> tokens = new List<Token>();
-        int index, row = 1;
+        int index=0, row = 1;
         using (StreamReader sr = new StreamReader(filePath))
         {
             string line;
@@ -91,7 +93,7 @@ class Tokenizer
         }
 
         tokens.RemoveAt(tokens.Count - 1);
-        //tokens.Add(new Token("EOF", "EOF", row, 0));
+        tokens.Add(new Token("EOF", "End Of File", row-1, index));
         return tokens;
     }
 
