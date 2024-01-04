@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
-
 
 class Token
 {
@@ -39,7 +36,7 @@ class Tokenizer
         
         try
         {
-            List<Token> tokens = tokenizeFile2(filePath);
+            List<Token> tokens = tokenizeFile(filePath);
             foreach (Token token in tokens)
             {
                 if(token.Text != "EOF")
@@ -50,6 +47,7 @@ class Tokenizer
                 Console.WriteLine($"{token.Text,-32} {token.Type,-20}" +
                         $" at row {token.Row} index {token.Index} ");
             }
+            Console.WriteLine("[" + string.Join(", ", getTokens(tokens)) + "]");
         }
         catch (Exception e)
         {
@@ -57,7 +55,9 @@ class Tokenizer
         }
     }
 
-    static List<Token> tokenizeFile2(string filePath)
+
+    // Gets the list of tokens
+    static List<Token> tokenizeFile(string filePath)
     {
         List<Token> tokens = new List<Token>();
         int index=0, row = 1;
@@ -66,6 +66,7 @@ class Tokenizer
             string line;
             while ((line = sr.ReadLine()) != null)
             {
+                // loops through each character in the string
                 int start = 0;
                 for(index = 0; index < line.Length; index++)
                 {
@@ -80,6 +81,8 @@ class Tokenizer
                         tokens.Add(delimeter);
                     }
                 }
+
+                // checks if there are remaining characters in the line after the loop
                 if (start < line.Length)
                 {
                     string token = line.Substring(start);
@@ -97,13 +100,14 @@ class Tokenizer
         return tokens;
     }
 
+
+    // Classifies each token
     static String TokenType(String token)
     {
         String punctuationMarks = ".?!,:;()[]{}<>\"'/*&#~\\@^|`";
-        //String operations = "+*-/%";
         if (string.IsNullOrWhiteSpace(token))
         {
-            return "SPACE";
+            return "WHITESPACE";
         }
         else if (double.TryParse(token.Replace(" ", "").Replace(",", ""), out _))
         {
@@ -131,6 +135,8 @@ class Tokenizer
             return "SPECIAL TOKEN";
         }
     }
+
+    // gets the string aray of tokes without the delimiter
     static string[] getTokens(List<Token> tokens)
     {
         List<string> tokenList = new List<string>();
@@ -142,6 +148,12 @@ class Tokenizer
             }
         }
         return tokenList.ToArray();
+    }
+
+    
+    public void printTokenArr(string[] arr)
+    {
+        Console.Write("[" + string.Join(", ", arr) + "]"); 
     }
 }
 
