@@ -53,6 +53,11 @@
   <ItemGroup>
     <Content Include="TextFiles\Sample1.txt" />
     <Content Include="TextFiles\Sample2.txt" />
+    <Content Include="TextFiles\SampleComplex1.txt" />
+    <Content Include="TextFiles\SampleComplex2.txt" />
+    <Content Include="TextFiles\SampleEZ1.txt" />
+    <Content Include="TextFiles\SampleMid1.txt" />
+    <Content Include="TextFiles\SampleMid2.txt" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

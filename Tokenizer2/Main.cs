@@ -19,7 +19,7 @@ class Token
     }
     public string GetInfo()
     {
-        return $"Token: {Text,-25} {Type,-20} at row {Row} index {Index}";
+        return $"{Type,-20} '{Text + "'",-40} at row {Row} index {Index}";
     }
 
 }
@@ -33,34 +33,31 @@ class Tokenizer
         string currentDirectory = Directory.GetCurrentDirectory();
         string projectDirectory = Directory.GetParent(currentDirectory)?.Parent?.FullName;
         string filePath = Path.Combine(projectDirectory, fileName);
-        
         try
         {
             List<Token> tokens = tokenizeFile(filePath);
             foreach (Token token in tokens)
             {
-                if(token.Text != "EOF")
+                if (token.Text != "EOF")
                 {
                     Console.WriteLine(token.GetInfo());
                     continue;
                 }
-                Console.WriteLine($"{token.Text,-32} {token.Type,-20}" +
+                Console.WriteLine($"{token.Type,-20} {token.Text,-40} " +
                         $" at row {token.Row} index {token.Index} ");
             }
-            Console.WriteLine("[" + string.Join(", ", getTokens(tokens)) + "]");
+            Console.WriteLine("[" + string.Join(", ", getTokensWithoutDelim(tokens)) + "]");
         }
         catch (Exception e)
         {
             Console.WriteLine(e.Message);
         }
     }
-
-
     // Gets the list of tokens
     static List<Token> tokenizeFile(string filePath)
     {
         List<Token> tokens = new List<Token>();
-        int index=0, row = 1;
+        int index = 0, row = 1;
         using (StreamReader sr = new StreamReader(filePath))
         {
             string line;
@@ -68,7 +65,7 @@ class Tokenizer
             {
                 // loops through each character in the string
                 int start = 0;
-                for(index = 0; index < line.Length; index++)
+                for (index = 0; index < line.Length; index++)
                 {
                     if (line[index] == '-')
                     {
@@ -90,30 +87,38 @@ class Tokenizer
                     tokens.Add(newToken);
                 }
                 tokens.Add(new Token("\\n", "LINE BREAK", row, index));
-                row++; 
+                row++;
 
             }
         }
 
         tokens.RemoveAt(tokens.Count - 1);
-        tokens.Add(new Token("EOF", "End Of File", row-1, index));
+        tokens.Add(new Token("EOF", "END OF FILE", row - 1, index));
         return tokens;
     }
 
 
     // Classifies each token
-    static String TokenType(String token)
+    static string TokenType(string token)
     {
-        String punctuationMarks = ".?!,:;()[]{}<>\"'/*&#~\\@^|`";
-        if (string.IsNullOrWhiteSpace(token))
+        string punctuationMarks = ".?!,:;()[]{}<>\"'/*&#~\\@^|`";
+     
+        if (string.IsNullOrEmpty(token))
+        {
+            return "NULL";
+        }
+        else if (string.IsNullOrWhiteSpace(token))
         {
             return "WHITESPACE";
         }
+        // This allows for checking numbser with formats like this (1,000 and 1 000)
         else if (double.TryParse(token.Replace(" ", "").Replace(",", ""), out _))
         {
             return "NUMBER";
         }
-        else if (Regex.IsMatch(token.Trim(), @"^[a-zA-Z]{2,}$") || token.Trim().ToLower().Equals("a") 
+        // This regex checks if tokes consists of alphabetic letters and if it has 2 or more characters.
+        // It also puts into account the possible punctuation marks that can commonly seedn after words
+        else if (Regex.IsMatch(token.Trim(), @"^[a-zA-Z'’]{2,}[.,!?]*$") || token.Trim().ToLower().Equals("a")
             || token.Trim().ToLower().Equals("i"))
         {
             return "WORD";
@@ -122,6 +127,7 @@ class Tokenizer
         {
             return "LETTER";
         }
+        // This regex checks if a token consists of alphabetic words
         else if (Regex.IsMatch(token, @"\b[A-Za-z]+\b") && token.Trim().Split(' ').Count() > 1)
         {
             return "PHRASE";
@@ -137,10 +143,10 @@ class Tokenizer
     }
 
     // gets the string aray of tokes without the delimiter
-    static string[] getTokens(List<Token> tokens)
+    static string[] getTokensWithoutDelim(List<Token> tokens)
     {
         List<string> tokenList = new List<string>();
-        for(int i = 0; i < tokens.Count; i++)
+        for (int i = 0; i < tokens.Count; i++)
         {
             if (tokens[i].Text != "-")
             {
@@ -148,12 +154,6 @@ class Tokenizer
             }
         }
         return tokenList.ToArray();
-    }
-
-    
-    public void printTokenArr(string[] arr)
-    {
-        Console.Write("[" + string.Join(", ", arr) + "]"); 
     }
 }
 
